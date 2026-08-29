@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>মাসিক ফুলকুঁড়ি | এই মাসের ম্যাগাজিন</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f4f2ee;
+    color: #1a1a1a;
+  }
+  header {
+    background: #1e4d3b;
+    color: #fff;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+  header p {
+    margin: 0.4rem 0 0;
+    opacity: 0.85;
+    font-size: 0.95rem;
+  }
+  main {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  .info-bar {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .info-bar .issue-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e4d3b;
+  }
+  .info-bar .issue-date {
+    color: #777;
+    font-size: 0.9rem;
+  }
+  .download-btn {
+    background: #1e4d3b;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .viewer-wrap {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  iframe {
+    width: 100%;
+    height: 80vh;
+    border: none;
+    display: block;
+  }
+  .status, .error {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #666;
+  }
+  .error {
+    color: #b33;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>মাসিক ফুলকুঁড়ি</h1>
+  <p>এই মাসের ম্যাগাজিন — স্বয়ংক্রিয়ভাবে সংগ্রহ করা</p>
+</header>
+
+<main>
+  <div id="content" class="status">Loading latest issue…</div>
+</main>
+
+<script>
+async function loadLatestIssue() {
+  const content = document.getElementById("content");
+  try {
+    // last_issue.json lives in the same repo, so this is a same-origin
+    // request once the site is served via GitHub Pages — no CORS issue.
+    const res = await fetch("last_issue.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("Could not load last_issue.json (HTTP " + res.status + ")");
+    const data = await res.json();
+
+    const pdfPath = "issues/" + data.date.slice(0, 7) + ".pdf";
+    const dateStr = new Date(data.date).toLocaleDateString("bn-BD", {
+      year: "numeric",
+      month: "long",
+    });
+
+    content.outerHTML = `
+      <div class="info-bar">
+        <div>
+          <div class="issue-title">${data.title}</div>
+          <div class="issue-date">${dateStr}</div>
+        </div>
+        <a class="download-btn" href="${pdfPath}" download>ডাউনলোড করুন</a>
+      </div>
+      <div class="viewer-wrap">
+        <iframe src="${pdfPath}" title="Latest magazine issue"></iframe>
+      </div>
+    `;
+  } catch (err) {
+    content.className = "error";
+    content.textContent = "ম্যাগাজিন লোড করা যায়নি: " + err.message;
+  }
+}
+
+loadLatestIssue();
+</script>
+
+</body>
+</html>
